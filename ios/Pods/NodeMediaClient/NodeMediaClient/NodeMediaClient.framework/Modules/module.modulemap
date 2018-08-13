@@ -1,0 +1,6 @@
+framework module NodeMediaClient {
+  umbrella header "NodeMediaClient.h"
+
+  export *
+  module * { export * }
+}

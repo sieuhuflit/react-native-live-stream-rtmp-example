@@ -1,0 +1,10 @@
+# Uncomment the next line to define a global platform for your project
+# platform :ios, '9.0'
+# ‘QLive’ is an example project name, please change it to yours.
+target 'LiveStream' do
+  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
+  # use_frameworks!
+
+  # Pods for QLive
+  pod 'NodeMediaClient'
+end

@@ -1,0 +1,1 @@
+../../../../NodeMediaClient/NodeMediaClient/NodeMediaClient.framework/Headers/NodePublisher.h
