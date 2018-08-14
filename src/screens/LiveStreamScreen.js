@@ -14,7 +14,9 @@ import {
   Platform,
   Alert,
   ScrollView,
-  LayoutAnimation
+  LayoutAnimation,
+  WebView,
+  Modal
 } from 'react-native';
 import KeyboardAccessory from 'react-native-sticky-keyboard-accessory';
 import { NodeCameraView, NodePlayerView } from 'react-native-nodemediaclient';
@@ -39,12 +41,23 @@ export default class LiveStreamScreen extends Component {
       countHeart: 0,
       message: '',
       visibleListMessages: true,
-      listMessages: [],
+      listMessages: [
+        {
+          userId: 'user1',
+          message: 'Link for info about product 1',
+          productId: 1,
+          productImageUrl:
+            'https://cf.shopee.vn/file/3c18ee889c242196030a86b7ce86a59e_tn',
+          productUrl:
+            'https://shopee.vn/Áo-sơ-mi-lụa-dài-tay-kẻ-sọc-nam-…-style-Hàn-Quốc-MỚI-(7-màu)-i.12260860.1025065219'
+        }
+      ],
       dropZoneCoordinates: null,
       keyboardHeight: 0,
       productId: null,
       productUrl: null,
-      productImageUrl: null
+      productImageUrl: null,
+      modalVisible: false
     };
     this.Animation = new Animated.Value(0);
     this.scrollView = null;
@@ -152,8 +165,7 @@ export default class LiveStreamScreen extends Component {
         Utils.getUserId(),
         message
       );
-    }
-    if (message !== '') {
+    } else if (message !== '') {
       this.setState({ message: '' });
       Keyboard.dismiss();
       const newListMessages = listMessages.slice();
@@ -168,6 +180,15 @@ export default class LiveStreamScreen extends Component {
         message
       );
     }
+  };
+
+  onPressCloseModal = () => {
+    this.setState({
+      productId: null,
+      productUrl: null,
+      productImageUrl: null,
+      modalVisible: false
+    });
   };
 
   onPressCancelViewer = () => {
@@ -303,6 +324,15 @@ export default class LiveStreamScreen extends Component {
     });
   };
 
+  onPressProduct = item => {
+    this.setState({
+      modalVisible: true,
+      productId: item.id,
+      productImageUrl: item.productImageUrl,
+      productUrl: item.productUrl
+    });
+  };
+
   onFinishDragProduct1 = () => {
     this.setState({
       message: 'Link for info about product 1',
@@ -314,13 +344,26 @@ export default class LiveStreamScreen extends Component {
     });
   };
 
-  // onFinishDragProduct2 = () => {
-  //   this.setState({ message: '#Product2' });
-  // };
+  onFinishDragProduct2 = () => {
+    this.setState({
+      message: 'Link for info about product 2',
+      productId: 2,
+      productImageUrl:
+        'https://cf.shopee.vn/file/1366956e12b7c40936a1e11ffe1bd486_tn',
+      productUrl: 'https://shopee.vn/Giày-thể-thao-nữ-G425-i.35709944.626245005'
+    });
+  };
 
-  // onFinishDragProduct3 = () => {
-  //   this.setState({ message: '#Product3' });
-  // };
+  onFinishDragProduct3 = () => {
+    this.setState({
+      message: 'Link for info about product 3',
+      productId: 3,
+      productImageUrl:
+        'https://cf.shopee.vn/file/31df73f75132ec3f979c39c550e249b5',
+      productUrl:
+        'https://shopee.vn/⚡Free-ship-Giầy-PROPHERE-Nam-Nữ-đế-mầu-cực-chất-(sẵn-hình-thật-hộp)-083-i.7466021.1123770706'
+    });
+  };
 
   renderGroupInput = () => {
     const { message, dropZoneCoordinates, keyboardHeight } = this.state;
@@ -343,7 +386,7 @@ export default class LiveStreamScreen extends Component {
                     dropZoneCoordinates={dropZoneCoordinates}
                     onFinishDragProduct={this.onFinishDragProduct1}
                   />
-                  {/* <Draggable
+                  <Draggable
                     imageUrl={
                       'https://cf.shopee.vn/file/1366956e12b7c40936a1e11ffe1bd486_tn'
                     }
@@ -352,11 +395,11 @@ export default class LiveStreamScreen extends Component {
                   />
                   <Draggable
                     imageUrl={
-                      'https://cf.shopee.vn/file/8666ed90e145476add2a4610fee18db9_tn'
+                      'https://cf.shopee.vn/file/31df73f75132ec3f979c39c550e249b5'
                     }
                     dropZoneCoordinates={dropZoneCoordinates}
                     onFinishDragProduct={this.onFinishDragProduct3}
-                  /> */}
+                  />
                 </View>
               )}
               <View
@@ -468,9 +511,9 @@ export default class LiveStreamScreen extends Component {
           }}
         >
           {listMessages.length > 0 &&
-            listMessages.map(item => {
+            listMessages.map((item, index) => {
               return (
-                <View style={styles.chatItem}>
+                <View style={styles.chatItem} key={index}>
                   <View style={styles.wrapAvatar}>
                     {item.avatar ? (
                       <Image source={item.avatar} style={styles.iconAvatar} />
@@ -482,6 +525,27 @@ export default class LiveStreamScreen extends Component {
                     )}
                   </View>
                   <View style={styles.messageItem}>
+                    <TouchableWithoutFeedback
+                      onPress={() => this.onPressProduct(item)}
+                    >
+                      <View style={styles.wrapSeeDetail}>
+                        <Image
+                          source={{ uri: item.productImageUrl }}
+                          style={styles.iconProduct}
+                        />
+                        <Text
+                          style={{
+                            marginLeft: 5,
+                            fontSize: 17,
+                            fontWeight: 'bold',
+                            color: 'skyblue',
+                            width: 120
+                          }}
+                        >
+                          Click here to see detail
+                        </Text>
+                      </View>
+                    </TouchableWithoutFeedback>
                     <Text style={styles.name}>{item.userId}</Text>
                     <Text style={styles.content}>{item.message}</Text>
                   </View>
@@ -557,6 +621,35 @@ export default class LiveStreamScreen extends Component {
           </View>
         </TouchableWithoutFeedback>
         {this.renderListMessages()}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={this.state.modalVisible}
+          onRequestClose={() => {
+            alert('Modal has been closed.');
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              justifyContent: 'center'
+            }}
+          >
+            <TouchableOpacity
+              style={styles.buttonCloseModal}
+              onPress={this.onPressCloseModal}
+            >
+              <Image
+                source={require('../assets/ico_cancel.png')}
+                style={styles.iconCancel}
+              />
+            </TouchableOpacity>
+            <View style={styles.wrapWebview}>
+              <WebView source={{ uri: this.state.productUrl }} />
+            </View>
+          </View>
+        </Modal>
       </View>
     );
   };
@@ -887,6 +980,12 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44
   },
+  iconProduct: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 10
+  },
   name: {
     fontSize: 15,
     fontWeight: '700'
@@ -908,6 +1007,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
+  buttonCloseModal: {
+    height: 40,
+    flexDirection: 'row',
+    position: 'absolute',
+    top: 15,
+    right: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   iconCancel: {
     width: 20,
     height: 20,
@@ -917,5 +1030,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginBottom: 15
+  },
+  wrapSeeDetail: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignContent: 'center'
+  },
+  wrapWebview: {
+    flex: 0.8,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    marginHorizontal: 20
   }
 });
