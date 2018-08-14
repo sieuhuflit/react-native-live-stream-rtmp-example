@@ -6,7 +6,7 @@ import {
   StatusBar,
   TouchableOpacity,
   StyleSheet,
-  Image
+  Image,
 } from 'react-native';
 import Utils from '../Utils';
 
@@ -22,6 +22,7 @@ export default class ListScreen extends Component {
     return (
       <View style={styles.container}>
         <StatusBar barStyle="dark-content" />
+
         <Button
           title="READY TO LIVE STREAM"
           onPress={() => {

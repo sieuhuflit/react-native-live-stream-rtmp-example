@@ -13,15 +13,16 @@ import {
   TextInput,
   Platform,
   Alert,
-  ScrollView
+  ScrollView,
+  LayoutAnimation
 } from 'react-native';
 import KeyboardAccessory from 'react-native-sticky-keyboard-accessory';
-import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { NodeCameraView, NodePlayerView } from 'react-native-nodemediaclient';
 import SocketUtils from '../SocketUtils';
 import LiveStatus from '../liveStatus';
 import Utils from '../Utils';
 import FloatingHearts from '../components/FloatingHearts';
+import Draggable from '../components/Draggable';
 
 const { width, height } = Dimensions.get('window');
 
@@ -38,13 +39,32 @@ export default class LiveStreamScreen extends Component {
       countHeart: 0,
       message: '',
       visibleListMessages: true,
-      listMessages: []
+      listMessages: [],
+      dropZoneCoordinates: null,
+      keyboardHeight: 0,
+      productId: null,
+      productUrl: null,
+      productImageUrl: null
     };
     this.Animation = new Animated.Value(0);
     this.scrollView = null;
   }
 
   componentDidMount = () => {
+    let keyboardShowEvent = 'keyboardWillShow';
+    let keyboardHideEvent = 'keyboardWillHide';
+
+    if (Platform.OS === 'android') {
+      keyboardShowEvent = 'keyboardDidShow';
+      keyboardHideEvent = 'keyboardDidHide';
+    }
+    this.keyboardShowListener = Keyboard.addListener(keyboardShowEvent, e =>
+      this.keyboardShow(e)
+    );
+    this.keyboardHideListener = Keyboard.addListener(keyboardHideEvent, e =>
+      this.keyboardHide(e)
+    );
+
     Utils.setContainer(this);
     const userType = Utils.getUserType();
     if (userType === 'STREAMER') {
@@ -57,6 +77,20 @@ export default class LiveStreamScreen extends Component {
       SocketUtils.emitReplay(Utils.getRoomName(), Utils.getUserId());
     }
   };
+
+  keyboardShow(e) {
+    LayoutAnimation.easeInEaseOut();
+    this.setState({
+      keyboardHeight: e.endCoordinates.height
+    });
+  }
+
+  keyboardHide(e) {
+    LayoutAnimation.easeInEaseOut();
+    this.setState({
+      keyboardHeight: 0
+    });
+  }
 
   StartBackgroundColorAnimation = () => {
     this.Animation.setValue(0);
@@ -91,7 +125,34 @@ export default class LiveStreamScreen extends Component {
   };
 
   onPressSend = () => {
-    const { message, listMessages } = this.state;
+    const {
+      message,
+      listMessages,
+      productId,
+      productImageUrl,
+      productUrl
+    } = this.state;
+    if (productId !== null && productUrl !== null && productImageUrl !== null) {
+      this.setState({ message: '' });
+      Keyboard.dismiss();
+      const newListMessages = listMessages.slice();
+      newListMessages.push({
+        userId: Utils.getUserId(),
+        message,
+        productId,
+        productImageUrl,
+        productUrl
+      });
+      this.setState({
+        listMessages: newListMessages,
+        visibleListMessages: true
+      });
+      SocketUtils.emitSendMessage(
+        Utils.getRoomName(),
+        Utils.getUserId(),
+        message
+      );
+    }
     if (message !== '') {
       this.setState({ message: '' });
       Keyboard.dismiss();
@@ -229,47 +290,132 @@ export default class LiveStreamScreen extends Component {
     );
   };
 
+  setDropZoneValues = ({ nativeEvent }) => {
+    const layout = {
+      y: nativeEvent.layout.y,
+      width: nativeEvent.layout.width,
+      x: nativeEvent.layout.x,
+      height: nativeEvent.layout.height,
+      keyboardHeight: this.state.keyboardHeight
+    };
+    this.setState({
+      dropZoneCoordinates: layout
+    });
+  };
+
+  onFinishDragProduct1 = () => {
+    this.setState({
+      message: 'Link for info about product 1',
+      productId: 1,
+      productImageUrl:
+        'https://cf.shopee.vn/file/3c18ee889c242196030a86b7ce86a59e_tn',
+      productUrl:
+        'https://shopee.vn/Áo-sơ-mi-lụa-dài-tay-kẻ-sọc-nam-nữ-cổ-Vest-unisex-mịn-mát-giá-rẻ-áo-style-Hàn-Quốc-MỚI-(7-màu)-i.12260860.1025065219'
+    });
+  };
+
+  // onFinishDragProduct2 = () => {
+  //   this.setState({ message: '#Product2' });
+  // };
+
+  // onFinishDragProduct3 = () => {
+  //   this.setState({ message: '#Product3' });
+  // };
+
   renderGroupInput = () => {
-    const { message } = this.state;
+    const { message, dropZoneCoordinates, keyboardHeight } = this.state;
     if (Platform.OS === 'ios') {
       return (
-        <KeyboardAccessory>
+        <KeyboardAccessory backgroundColor="transparent">
           <View style={styles.wrapBottom}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Comment input"
-              underlineColorAndroid="transparent"
-              onChangeText={this.onChangeMessageText}
-              value={message}
-              onEndEditing={this.onPressSend}
-              autoCapitalize={'none'}
-              autoCorrect={false}
-              onFocus={() => this.setState({ visibleListMessages: false })}
-              onEndEditing={() => {
-                Keyboard.dismiss();
-                this.setState({ visibleListMessages: true });
+            <View
+              style={{
+                flex: 1,
+                flexDirection: 'column'
               }}
-            />
-            <TouchableOpacity
-              style={styles.wrapIconSend}
-              onPress={this.onPressSend}
-              activeOpacity={0.6}
             >
-              <Image
-                source={require('../assets/ico_send.png')}
-                style={styles.iconSend}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.wrapIconHeart}
-              onPress={this.onPressHeart}
-              activeOpacity={0.6}
-            >
-              <Image
-                source={require('../assets/ico_heart.png')}
-                style={styles.iconHeart}
-              />
-            </TouchableOpacity>
+              {keyboardHeight > 0 && (
+                <View style={styles.row}>
+                  <Draggable
+                    imageUrl={
+                      'https://cf.shopee.vn/file/3c18ee889c242196030a86b7ce86a59e_tn'
+                    }
+                    dropZoneCoordinates={dropZoneCoordinates}
+                    onFinishDragProduct={this.onFinishDragProduct1}
+                  />
+                  {/* <Draggable
+                    imageUrl={
+                      'https://cf.shopee.vn/file/1366956e12b7c40936a1e11ffe1bd486_tn'
+                    }
+                    dropZoneCoordinates={dropZoneCoordinates}
+                    onFinishDragProduct={this.onFinishDragProduct2}
+                  />
+                  <Draggable
+                    imageUrl={
+                      'https://cf.shopee.vn/file/8666ed90e145476add2a4610fee18db9_tn'
+                    }
+                    dropZoneCoordinates={dropZoneCoordinates}
+                    onFinishDragProduct={this.onFinishDragProduct3}
+                  /> */}
+                </View>
+              )}
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  height: 45,
+                  marginHorizontal: 10,
+                  marginBottom: 10,
+                  borderRadius: 10,
+                  alignItems: 'center'
+                }}
+                onLayout={this.setDropZoneValues}
+              >
+                <TextInput
+                  style={{
+                    flex: 1,
+                    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+                    borderRadius: 10,
+                    paddingHorizontal: 15,
+                    height: 45
+                  }}
+                  placeholder="Comment input"
+                  underlineColorAndroid="transparent"
+                  onChangeText={this.onChangeMessageText}
+                  value={message}
+                  onEndEditing={this.onPressSend}
+                  autoCapitalize={'none'}
+                  autoCorrect={false}
+                  onFocus={() => {
+                    this.setState({ visibleListMessages: false });
+                  }}
+                  onEndEditing={() => {
+                    Keyboard.dismiss();
+                    this.setState({ visibleListMessages: true });
+                  }}
+                />
+                <TouchableOpacity
+                  style={styles.wrapIconSend}
+                  onPress={this.onPressSend}
+                  activeOpacity={0.6}
+                >
+                  <Image
+                    source={require('../assets/ico_send.png')}
+                    style={styles.iconSend}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.wrapIconHeart}
+                  onPress={this.onPressHeart}
+                  activeOpacity={0.6}
+                >
+                  <Image
+                    source={require('../assets/ico_heart.png')}
+                    style={styles.iconHeart}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
         </KeyboardAccessory>
       );
@@ -347,17 +493,6 @@ export default class LiveStreamScreen extends Component {
     );
   };
   renderStreamerUI = () => {
-    const BackgroundColorConfig = this.Animation.interpolate({
-      inputRange: [0, 0.2, 0.4, 0.6, 0.8, 1],
-      outputRange: [
-        '#1abc9c',
-        '#3498db',
-        '#9b59b6',
-        '#34495e',
-        '#f1c40f',
-        '#1abc9c'
-      ]
-    });
     const { liveStatus, countViewer, countHeart } = this.state;
 
     return (
@@ -567,12 +702,10 @@ export default class LiveStreamScreen extends Component {
 const styles = StyleSheet.create({
   containerBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    zIndex: 0
+    backgroundColor: 'rgba(0, 0, 0, 0.8)'
   },
   container: {
-    flex: 1,
-    zIndex: 0
+    flex: 1
   },
   wrapPromotionText: {
     position: 'absolute',
@@ -581,8 +714,7 @@ const styles = StyleSheet.create({
     right: 10,
     bottom: 0,
     justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 0
+    alignItems: 'center'
   },
   textPromotion: {
     color: 'white',
@@ -600,8 +732,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     height: 40,
     justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2
+    alignItems: 'center'
   },
   liveText: {
     fontSize: 18,
@@ -618,8 +749,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     height: 40,
     justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2
+    alignItems: 'center'
   },
   notLiveText: {
     fontSize: 18,
@@ -639,8 +769,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     borderRadius: 5,
     justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2
+    alignItems: 'center'
   },
   iconView: {
     width: 25,
@@ -660,8 +789,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     height: height,
-    width: width,
-    zIndex: 0
+    width: width
   },
   beginLiveStreamButton: {
     position: 'absolute',
@@ -692,13 +820,7 @@ const styles = StyleSheet.create({
     marginBottom: 70
   },
   wrapBottom: {
-    position: 'absolute',
-    bottom: 10,
-    left: 0,
-    right: 0,
-    height: height / 2,
-    width: width,
-    zIndex: 90000
+    // zIndex: 90000
   },
   textInput: {
     position: 'absolute',
@@ -709,40 +831,33 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 10,
-    height: 42,
-    zIndex: 2
+    height: 42
   },
   wrapIconHeart: {
-    position: 'absolute',
-    bottom: 5,
-    right: 12,
-    width: 42,
-    height: 42,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2
-  },
-  iconHeart: {
-    width: 42,
-    height: 42,
-    zIndex: 2
-  },
-  wrapIconSend: {
-    position: 'absolute',
-    bottom: 5,
-    right: 65,
     width: 42,
     height: 42,
     borderRadius: 42,
     backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 2
+    marginLeft: 8
+  },
+  iconHeart: {
+    width: 42,
+    height: 42
+  },
+  wrapIconSend: {
+    width: 42,
+    height: 42,
+    borderRadius: 42,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8
   },
   iconSend: {
     width: 33,
-    height: 33,
-    zIndex: 2
+    height: 33
   },
   wrapListMessages: {
     position: 'absolute',
@@ -758,8 +873,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 15,
-    marginVertical: 5,
-    zIndex: 2
+    marginVertical: 5
   },
   messageItem: {
     flexDirection: 'column',
@@ -767,22 +881,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.4)',
     paddingVertical: 8,
     paddingHorizontal: 15,
-    borderRadius: 15,
-    zIndex: 2
+    borderRadius: 15
   },
   iconAvatar: {
     width: 44,
-    height: 44,
-    zIndex: 2
+    height: 44
   },
   name: {
     fontSize: 15,
-    fontWeight: '700',
-    zIndex: 2
+    fontWeight: '700'
   },
   content: {
-    fontSize: 13,
-    zIndex: 2
+    fontSize: 13
   },
   buttonCancel: {
     height: 40,
@@ -796,13 +906,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     borderRadius: 5,
     justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2
+    alignItems: 'center'
   },
   iconCancel: {
     width: 20,
     height: 20,
-    tintColor: 'white',
-    zIndex: 2
+    tintColor: 'white'
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 15
   }
 });
