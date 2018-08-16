@@ -715,58 +715,84 @@ export default class LiveStreamScreen extends Component {
         '#1abc9c'
       ]
     });
-    const { countViewer, countHeart, liveStatus } = this.state;
+    const { liveStatus, countViewer, countHeart } = this.state;
     return (
       <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#6a51ae" />
+        {liveStatus === LiveStatus.ON_LIVE && (
+          <NodePlayerView
+            style={styles.streamerCameraView}
+            ref={vb => {
+              this.vbViewer = vb;
+            }}
+            inputUrl={Utils.getRtmpPath() + Utils.getRoomName()}
+            // inputUrl={'rtmp://192.168.1.2/live/' + Utils.getRoomName()}
+            scaleMode="ScaleAspectFit"
+            bufferTime={300}
+            maxBufferTime={1000}
+            autoplay
+          />
+        )}
         <TouchableWithoutFeedback
           onPress={() => {
             Keyboard.dismiss();
             this.setState({ visibleListMessages: true });
           }}
           accessible={false}
+          style={styles.viewDismissKeyboard}
         >
-          <Animated.View
-            style={[
-              styles.container,
-              { backgroundColor: BackgroundColorConfig }
-            ]}
-          >
-            {liveStatus === LiveStatus.ON_LIVE && (
-              <NodePlayerView
-                style={styles.streamerCameraView}
-                ref={vb => {
-                  this.vbViewer = vb;
-                }}
-                inputUrl={Utils.getRtmpPath() + Utils.getRoomName()}
-                // inputUrl={'rtmp://192.168.1.2/live/' + Utils.getRoomName()}
-                scaleMode="ScaleAspectFit"
-                bufferTime={300}
-                maxBufferTime={1000}
-                autoplay
-              />
-            )}
-            {this.renderCancelViewerButton()}
-            {this.renderLiveText()}
-            <View style={styles.wrapIconView}>
-              <Image
-                source={require('../assets/ico_view.png')}
-                style={styles.iconView}
-              />
-              <View style={styles.wrapTextViewer}>
-                <Text style={styles.textViewer}>{countViewer}</Text>
+          {liveStatus === LiveStatus.ON_LIVE ? (
+            <View style={styles.container}>
+              {this.renderCancelViewerButton()}
+              {this.renderLiveText()}
+              <View style={styles.wrapIconView}>
+                <Image
+                  source={require('../assets/ico_view.png')}
+                  style={styles.iconView}
+                />
+                <View style={styles.wrapTextViewer}>
+                  <Text style={styles.textViewer}>{countViewer}</Text>
+                </View>
               </View>
+              {this.renderGroupInput()}
+              <FloatingHearts
+                count={countHeart}
+                style={styles.wrapGroupHeart}
+              />
             </View>
-            {liveStatus === LiveStatus.REGISTER && (
-              <View style={styles.wrapPromotionText}>
-                <Text style={styles.textPromotion}>
-                  Stay here and wait until start live stream you will get 30%
-                  discount 😉
-                </Text>
+          ) : (
+            <Animated.View
+              style={[
+                styles.container,
+                { backgroundColor: BackgroundColorConfig }
+              ]}
+            >
+              {liveStatus === LiveStatus.REGISTER && (
+                <View style={styles.wrapPromotionText}>
+                  <Text style={styles.textPromotion}>
+                    Stay here and wait until start live stream you will get 30%
+                    discount 😉
+                  </Text>
+                </View>
+              )}
+              {this.renderCancelViewerButton()}
+              {this.renderLiveText()}
+              <View style={styles.wrapIconView}>
+                <Image
+                  source={require('../assets/ico_view.png')}
+                  style={styles.iconView}
+                />
+                <View style={styles.wrapTextViewer}>
+                  <Text style={styles.textViewer}>{countViewer}</Text>
+                </View>
               </View>
-            )}
-            <FloatingHearts count={countHeart} style={styles.wrapGroupHeart} />
-            {this.renderGroupInput()}
-          </Animated.View>
+              {this.renderGroupInput()}
+              <FloatingHearts
+                count={countHeart}
+                style={styles.wrapGroupHeart}
+              />
+            </Animated.View>
+          )}
         </TouchableWithoutFeedback>
         {this.renderListMessages()}
         <Modal
@@ -804,7 +830,6 @@ export default class LiveStreamScreen extends Component {
 
   renderReplayUI = () => {
     const { countViewer } = this.state;
-
     return (
       <View style={styles.container}>
         <TouchableWithoutFeedback

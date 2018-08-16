@@ -6,7 +6,7 @@ import {
   StatusBar,
   TouchableOpacity,
   StyleSheet,
-  Image,
+  Image
 } from 'react-native';
 import Utils from '../Utils';
 
@@ -17,6 +17,17 @@ export default class ListScreen extends Component {
   constructor(props) {
     super(props);
   }
+
+  onReplayButtonClicked = roomName => {
+    if (!Utils.isNullOrUndefined(Utils.getContainer())) {
+      if (Utils.getContainer().state.listMessages.length > 0) {
+        Utils.getContainer().setState({ listMessages: [] });
+      }
+    }
+    Utils.setUserType('REPLAY');
+    Utils.setRoomName('user1');
+    this.props.navigation.navigate('Live');
+  };
 
   render() {
     return (
@@ -44,11 +55,7 @@ export default class ListScreen extends Component {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.buttonPlay}
-            onPress={() => {
-              Utils.setUserType('REPLAY');
-              Utils.setRoomName('user1');
-              this.props.navigation.navigate('Live');
-            }}
+            onPress={() => this.onReplayButtonClicked('user1')}
           >
             <Image
               source={require('../assets/ico_play.png')}
@@ -70,11 +77,7 @@ export default class ListScreen extends Component {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.buttonPlay}
-            onPress={() => {
-              Utils.setUserType('REPLAY');
-              Utils.setRoomName('user2');
-              this.props.navigation.navigate('Live');
-            }}
+            onPress={() => this.onReplayButtonClicked('user2')}
           >
             <Image
               source={require('../assets/ico_play.png')}
@@ -95,11 +98,7 @@ export default class ListScreen extends Component {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.buttonPlay}
-            onPress={() => {
-              Utils.setUserType('REPLAY');
-              Utils.setRoomName('user3');
-              this.props.navigation.navigate('Live');
-            }}
+            onPress={() => this.onReplayButtonClicked('user3')}
           >
             <Image
               source={require('../assets/ico_play.png')}
