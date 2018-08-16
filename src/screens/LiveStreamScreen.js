@@ -8,7 +8,6 @@ import {
   Keyboard,
   Image,
   TouchableOpacity,
-  StatusBar,
   Animated,
   TextInput,
   Platform,
@@ -16,7 +15,8 @@ import {
   ScrollView,
   LayoutAnimation,
   WebView,
-  Modal
+  Modal,
+  StatusBar
 } from 'react-native';
 import KeyboardAccessory from 'react-native-sticky-keyboard-accessory';
 import { NodeCameraView, NodePlayerView } from 'react-native-nodemediaclient';
@@ -25,6 +25,7 @@ import LiveStatus from '../liveStatus';
 import Utils from '../Utils';
 import FloatingHearts from '../components/FloatingHearts';
 import Draggable from '../components/Draggable';
+import styles from './styles';
 
 const { width, height } = Dimensions.get('window');
 
@@ -42,22 +43,24 @@ export default class LiveStreamScreen extends Component {
       message: '',
       visibleListMessages: true,
       listMessages: [
-        {
-          userId: 'user1',
-          message: 'Link for info about product 1',
-          productId: 1,
-          productImageUrl:
-            'https://cf.shopee.vn/file/3c18ee889c242196030a86b7ce86a59e_tn',
-          productUrl:
-            'https://shopee.vn/Áo-sơ-mi-lụa-dài-tay-kẻ-sọc-nam-…-style-Hàn-Quốc-MỚI-(7-màu)-i.12260860.1025065219'
-        }
+        // {
+        //   userId: 'user1',
+        //   message: 'Link for info about product 1',
+        //   productId: 1,
+        //   productImageUrl:
+        //     'https://cf.shopee.vn/file/3c18ee889c242196030a86b7ce86a59e_tn',
+        //   productUrl:
+        //     'https://shopee.vn/Áo-sơ-mi-lụa-dài-tay-kẻ-sọc-nam-…-style-Hàn-Quốc-MỚI-(7-màu)-i.12260860.1025065219'
+        // }
       ],
       dropZoneCoordinates: null,
       keyboardHeight: 0,
       productId: null,
       productUrl: null,
       productImageUrl: null,
-      modalVisible: false
+      modalVisible: false,
+      keyboardHeight: 0,
+      inputHeight: 40
     };
     this.Animation = new Animated.Value(0);
     this.scrollView = null;
@@ -158,12 +161,18 @@ export default class LiveStreamScreen extends Component {
       });
       this.setState({
         listMessages: newListMessages,
-        visibleListMessages: true
+        visibleListMessages: true,
+        productId: null,
+        productUrl: null,
+        productImageUrl: null
       });
       SocketUtils.emitSendMessage(
         Utils.getRoomName(),
         Utils.getUserId(),
-        message
+        message,
+        productId,
+        productImageUrl,
+        productUrl
       );
     } else if (message !== '') {
       this.setState({ message: '' });
@@ -367,17 +376,19 @@ export default class LiveStreamScreen extends Component {
 
   renderGroupInput = () => {
     const { message, dropZoneCoordinates, keyboardHeight } = this.state;
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === 'android') {
       return (
-        <KeyboardAccessory backgroundColor="transparent">
+        <View
+          onLayout={this.setDropZoneValues}
+          style={{
+            flex: 1,
+            height: this.state.keyboardHeight,
+            zIndex: -1
+          }}
+        >
           <View style={styles.wrapBottom}>
-            <View
-              style={{
-                flex: 1,
-                flexDirection: 'column'
-              }}
-            >
-              {keyboardHeight > 0 && (
+            {keyboardHeight > 0 &&
+              Utils.getUserType() === 'STREAMER' && (
                 <View style={styles.row}>
                   <Draggable
                     imageUrl={
@@ -402,6 +413,79 @@ export default class LiveStreamScreen extends Component {
                   />
                 </View>
               )}
+            <View style={styles.wrapInputAndActionButton}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Comment input"
+                underlineColorAndroid="transparent"
+                onChangeText={this.onChangeMessageText}
+                value={message}
+                onEndEditing={this.onPressSend}
+                autoCapitalize={'none'}
+                autoCorrect={false}
+                onFocus={() => {
+                  this.setState({ visibleListMessages: false });
+                }}
+                onEndEditing={() => {
+                  Keyboard.dismiss();
+                  this.setState({ visibleListMessages: true });
+                }}
+              />
+              <TouchableOpacity
+                style={styles.wrapIconSend}
+                onPress={this.onPressSend}
+                activeOpacity={0.6}
+              >
+                <Image
+                  source={require('../assets/ico_send.png')}
+                  style={styles.iconSend}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.wrapIconHeart}
+                onPress={this.onPressHeart}
+                activeOpacity={0.6}
+              >
+                <Image
+                  source={require('../assets/ico_heart.png')}
+                  style={styles.iconHeart}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      );
+    } else {
+      return (
+        <KeyboardAccessory backgroundColor="transparent">
+          <View style={styles.wrapBottomIOS}>
+            <View style={styles.col}>
+              {keyboardHeight > 0 &&
+                Utils.getUserType() === 'STREAMER' && (
+                  <View style={styles.row}>
+                    <Draggable
+                      imageUrl={
+                        'https://cf.shopee.vn/file/3c18ee889c242196030a86b7ce86a59e_tn'
+                      }
+                      dropZoneCoordinates={dropZoneCoordinates}
+                      onFinishDragProduct={this.onFinishDragProduct1}
+                    />
+                    <Draggable
+                      imageUrl={
+                        'https://cf.shopee.vn/file/1366956e12b7c40936a1e11ffe1bd486_tn'
+                      }
+                      dropZoneCoordinates={dropZoneCoordinates}
+                      onFinishDragProduct={this.onFinishDragProduct2}
+                    />
+                    <Draggable
+                      imageUrl={
+                        'https://cf.shopee.vn/file/31df73f75132ec3f979c39c550e249b5'
+                      }
+                      dropZoneCoordinates={dropZoneCoordinates}
+                      onFinishDragProduct={this.onFinishDragProduct3}
+                    />
+                  </View>
+                )}
               <View
                 style={{
                   flex: 1,
@@ -415,13 +499,7 @@ export default class LiveStreamScreen extends Component {
                 onLayout={this.setDropZoneValues}
               >
                 <TextInput
-                  style={{
-                    flex: 1,
-                    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-                    borderRadius: 10,
-                    paddingHorizontal: 15,
-                    height: 45
-                  }}
+                  style={styles.textInput}
                   placeholder="Comment input"
                   underlineColorAndroid="transparent"
                   onChangeText={this.onChangeMessageText}
@@ -462,38 +540,6 @@ export default class LiveStreamScreen extends Component {
           </View>
         </KeyboardAccessory>
       );
-    } else {
-      return (
-        <View style={styles.wrapBottom}>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Comment input"
-            underlineColorAndroid="transparent"
-            onChangeText={this.onChangeMessageText}
-            value={message}
-          />
-          <TouchableOpacity
-            style={styles.wrapIconSend}
-            onPress={this.onPressSend}
-            activeOpacity={0.6}
-          >
-            <Image
-              source={require('../assets/ico_send.png')}
-              style={styles.iconSend}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.wrapIconHeart}
-            onPress={this.onPressHeart}
-            activeOpacity={0.6}
-          >
-            <Image
-              source={require('../assets/ico_heart.png')}
-              style={styles.iconHeart}
-            />
-          </TouchableOpacity>
-        </View>
-      );
     }
   };
 
@@ -512,6 +558,13 @@ export default class LiveStreamScreen extends Component {
         >
           {listMessages.length > 0 &&
             listMessages.map((item, index) => {
+              const {
+                productId,
+                productUrl,
+                productImageUrl,
+                userId,
+                message
+              } = item;
               return (
                 <View style={styles.chatItem} key={index}>
                   <View style={styles.wrapAvatar}>
@@ -525,29 +578,26 @@ export default class LiveStreamScreen extends Component {
                     )}
                   </View>
                   <View style={styles.messageItem}>
-                    <TouchableWithoutFeedback
-                      onPress={() => this.onPressProduct(item)}
-                    >
-                      <View style={styles.wrapSeeDetail}>
-                        <Image
-                          source={{ uri: item.productImageUrl }}
-                          style={styles.iconProduct}
-                        />
-                        <Text
-                          style={{
-                            marginLeft: 5,
-                            fontSize: 17,
-                            fontWeight: 'bold',
-                            color: 'skyblue',
-                            width: 120
-                          }}
+                    {productId !== undefined &&
+                      productUrl !== undefined &&
+                      productImageUrl !== undefined && (
+                        <TouchableWithoutFeedback
+                          onPress={() => this.onPressProduct(item)}
                         >
-                          Click here to see detail
-                        </Text>
-                      </View>
-                    </TouchableWithoutFeedback>
-                    <Text style={styles.name}>{item.userId}</Text>
-                    <Text style={styles.content}>{item.message}</Text>
+                          <View style={styles.wrapSeeDetail}>
+                            <Image
+                              source={{ uri: productImageUrl }}
+                              style={styles.iconProduct}
+                            />
+                            <Text style={styles.textShowDetail}>
+                              Click here to see detail
+                            </Text>
+                          </View>
+                        </TouchableWithoutFeedback>
+                      )}
+
+                    <Text style={styles.name}>{userId}</Text>
+                    <Text style={styles.content}>{message}</Text>
                   </View>
                 </View>
               );
@@ -558,28 +608,26 @@ export default class LiveStreamScreen extends Component {
   };
   renderStreamerUI = () => {
     const { liveStatus, countViewer, countHeart } = this.state;
-
     return (
       <View style={styles.container}>
-        <StatusBar hidden />
+        <StatusBar barStyle="light-content" backgroundColor="#6a51ae" />
         <NodeCameraView
           style={styles.streamerCameraView}
           ref={vb => {
             this.vbCamera = vb;
           }}
           outputUrl={Utils.getRtmpPath() + Utils.getRoomName()}
-          // outputUrl={'rtmp://192.168.1.2/live/' + Utils.getRoomName()}
           camera={{ cameraId: 1, cameraFrontMirror: true }}
           audio={{ bitrate: 32000, profile: 1, samplerate: 44100 }}
           video={{
-            preset: 24,
-            bitrate: 400000,
-            profile: 2,
-            fps: 30,
-            videoFrontMirror: true
+            preset: 1,
+            bitrate: 500000,
+            profile: 1,
+            fps: 15,
+            videoFrontMirror: false
           }}
-          autopreview
-          smoothSkinLevel={5}
+          smoothSkinLevel={3}
+          autopreview={true}
         />
         <TouchableWithoutFeedback
           onPress={() => {
@@ -587,6 +635,7 @@ export default class LiveStreamScreen extends Component {
             this.setState({ visibleListMessages: true });
           }}
           accessible={false}
+          style={styles.viewDismissKeyboard}
         >
           <View style={styles.container}>
             {this.renderCancelStreamerButton()}
@@ -669,7 +718,6 @@ export default class LiveStreamScreen extends Component {
     const { countViewer, countHeart, liveStatus } = this.state;
     return (
       <View style={styles.container}>
-        <StatusBar hidden />
         <TouchableWithoutFeedback
           onPress={() => {
             Keyboard.dismiss();
@@ -721,6 +769,35 @@ export default class LiveStreamScreen extends Component {
           </Animated.View>
         </TouchableWithoutFeedback>
         {this.renderListMessages()}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={this.state.modalVisible}
+          onRequestClose={() => {
+            alert('Modal has been closed.');
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              justifyContent: 'center'
+            }}
+          >
+            <TouchableOpacity
+              style={styles.buttonCloseModal}
+              onPress={this.onPressCloseModal}
+            >
+              <Image
+                source={require('../assets/ico_cancel.png')}
+                style={styles.iconCancel}
+              />
+            </TouchableOpacity>
+            <View style={styles.wrapWebview}>
+              <WebView source={{ uri: this.state.productUrl }} />
+            </View>
+          </View>
+        </Modal>
       </View>
     );
   };
@@ -730,7 +807,6 @@ export default class LiveStreamScreen extends Component {
 
     return (
       <View style={styles.container}>
-        <StatusBar hidden />
         <TouchableWithoutFeedback
           onPress={() => {
             Keyboard.dismiss();
@@ -781,7 +857,6 @@ export default class LiveStreamScreen extends Component {
 
   render() {
     const type = Utils.getUserType();
-    console.log(type);
     if (type === 'STREAMER') {
       return this.renderStreamerUI();
     } else if (type === 'VIEWER') {
@@ -791,257 +866,3 @@ export default class LiveStreamScreen extends Component {
     }
   }
 }
-
-const styles = StyleSheet.create({
-  containerBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)'
-  },
-  container: {
-    flex: 1
-  },
-  wrapPromotionText: {
-    position: 'absolute',
-    top: 0,
-    left: 10,
-    right: 10,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  textPromotion: {
-    color: 'white',
-    fontSize: 28,
-    textAlign: 'center',
-    fontWeight: '200'
-  },
-  wrapLiveText: {
-    position: 'absolute',
-    top: 15,
-    left: 60,
-    backgroundColor: 'rgba(231, 76, 60, 0.85)',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 5,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  liveText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: 'white'
-  },
-  wrapNotLiveText: {
-    position: 'absolute',
-    top: 15,
-    left: 60,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 5,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  notLiveText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: 'white'
-  },
-  wrapIconView: {
-    height: 40,
-    flexDirection: 'row',
-    position: 'absolute',
-    top: 15,
-    left: 130,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 6,
-    borderRadius: 5,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  iconView: {
-    width: 25,
-    height: 25,
-    tintColor: 'white'
-  },
-  wrapTextViewer: {
-    marginLeft: 5
-  },
-  textViewer: {
-    fontSize: 16,
-    color: 'white',
-    fontWeight: '500'
-  },
-  streamerCameraView: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    height: height,
-    width: width
-  },
-  beginLiveStreamButton: {
-    position: 'absolute',
-    top: 15,
-    right: 15,
-    backgroundColor: '#a55eea',
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-    borderRadius: 10
-  },
-  finishLiveStreamButton: {
-    position: 'absolute',
-    top: 15,
-    right: 15,
-    backgroundColor: '#ff6b6b',
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-    borderRadius: 10
-  },
-  beginLiveStreamText: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: 'white'
-  },
-  wrapGroupHeart: {
-    marginBottom: 70
-  },
-  wrapBottom: {
-    // zIndex: 90000
-  },
-  textInput: {
-    position: 'absolute',
-    bottom: 4,
-    left: 15,
-    right: 120,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    height: 42
-  },
-  wrapIconHeart: {
-    width: 42,
-    height: 42,
-    borderRadius: 42,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 8
-  },
-  iconHeart: {
-    width: 42,
-    height: 42
-  },
-  wrapIconSend: {
-    width: 42,
-    height: 42,
-    borderRadius: 42,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 8
-  },
-  iconSend: {
-    width: 33,
-    height: 33
-  },
-  wrapListMessages: {
-    position: 'absolute',
-    bottom: 70,
-    left: 0,
-    right: 0,
-    height: width / 1.5,
-    width: width,
-    zIndex: 2
-  },
-  chatItem: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 15,
-    marginVertical: 5
-  },
-  messageItem: {
-    flexDirection: 'column',
-    marginHorizontal: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 15
-  },
-  iconAvatar: {
-    width: 44,
-    height: 44
-  },
-  iconProduct: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginRight: 10
-  },
-  name: {
-    fontSize: 15,
-    fontWeight: '700'
-  },
-  content: {
-    fontSize: 13
-  },
-  buttonCancel: {
-    height: 40,
-    flexDirection: 'row',
-    position: 'absolute',
-    top: 15,
-    left: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 6,
-    borderRadius: 5,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  buttonCloseModal: {
-    height: 40,
-    flexDirection: 'row',
-    position: 'absolute',
-    top: 15,
-    right: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 6,
-    borderRadius: 5,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  iconCancel: {
-    width: 20,
-    height: 20,
-    tintColor: 'white'
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 15
-  },
-  wrapSeeDetail: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignContent: 'center'
-  },
-  wrapWebview: {
-    flex: 0.8,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    marginHorizontal: 20
-  }
-});

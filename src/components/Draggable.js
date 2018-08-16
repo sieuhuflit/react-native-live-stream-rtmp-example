@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import {
   StyleSheet,
-  View,
-  Image,
+  Platform,
   PanResponder,
   Animated,
   Dimensions
@@ -25,7 +24,7 @@ export default class Draggable extends Component {
     this.panResponder = PanResponder.create({
       onStartShouldSetPanResponder: (e, gesture) => true,
       onPanResponderGrant: () => {
-        this.changeBlockSize(82);
+        this.changeBlockSize(70);
       },
       onPanResponderMove: (e, gesture) =>
         Animated.event([
@@ -42,13 +41,21 @@ export default class Draggable extends Component {
   slideFinished() {
     let { dropZoneCoordinates } = this.props;
     this.animatedView._component.measure((fx, fy, width, height, sx, sy) => {
-      sy >
-      SCREEN_HEIGHT -
-        dropZoneCoordinates.keyboardHeight -
-        dropZoneCoordinates.height -
-        dropZoneCoordinates.y
-        ? this.addToCart()
-        : this.backToStart();
+      if (Platform.OS === 'android') {
+        sy > SCREEN_HEIGHT - dropZoneCoordinates.height &&
+        sy < dropZoneCoordinates.height
+          ? this.addToCart()
+          : this.backToStart();
+      } else {
+        sy >
+          SCREEN_HEIGHT -
+            dropZoneCoordinates.height -
+            dropZoneCoordinates.y -
+            dropZoneCoordinates.keyboardHeight &&
+        sy < SCREEN_HEIGHT - dropZoneCoordinates.keyboardHeight
+          ? this.addToCart()
+          : this.backToStart();
+      }
     });
   }
 
@@ -64,20 +71,23 @@ export default class Draggable extends Component {
   slideToStop({ vx, vy }) {
     Animated.decay(this.state.pan, {
       velocity: { x: vx, y: vy },
-      deceleration: 0.98
+      deceleration: 0.98,
+      useNativeDriver: Platform.OS === 'android'
     }).start(() => this.slideFinished());
   }
   changeBlockSize(value) {
     Animated.timing(this.state.size, {
       duration: 200,
-      toValue: value
+      toValue: value,
+      useNativeDriver: Platform.OS === 'android'
     }).start();
   }
 
   backToStart() {
     Animated.spring(this.state.pan, {
       speed: 25,
-      toValue: 0
+      toValue: 0,
+      useNativeDriver: Platform.OS === 'android'
     }).start();
   }
 
@@ -85,15 +95,18 @@ export default class Draggable extends Component {
     Animated.sequence([
       Animated.timing(this.state.size, {
         toValue: 0,
-        duration: 200
+        duration: 200,
+        useNativeDriver: Platform.OS === 'android'
       }),
       Animated.timing(this.state.pan, {
         toValue: 0,
-        duration: 0
+        duration: 0,
+        useNativeDriver: Platform.OS === 'android'
       }),
       Animated.timing(this.state.size, {
         toValue: 100,
-        duration: 200
+        duration: 200,
+        useNativeDriver: Platform.OS === 'android'
       })
     ]).start();
   }
@@ -101,8 +114,8 @@ export default class Draggable extends Component {
   render() {
     const panStyle = {
       transform: this.state.pan.getTranslateTransform(),
-      width: this.state.size,
-      height: this.state.size
+      width: Platform.OS === 'android' ? 100 : this.state.size,
+      height: Platform.OS === 'android' ? 100 : this.state.size
     };
     return (
       <Animated.Image
@@ -117,7 +130,6 @@ export default class Draggable extends Component {
 
 let styles = StyleSheet.create({
   circle: {
-    backgroundColor: 'skyblue',
-    borderRadius: 5
+    borderRadius: 15
   }
 });

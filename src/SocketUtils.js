@@ -101,20 +101,35 @@ const emitSendHeart = roomName => {
 
 const handleOnSendMessage = () => {
   socket.on('send-message', data => {
-    console.log('send-message');
-    const { userId, message } = data;
+    const { userId, message, productId, productImageUrl, productUrl } = data;
     listMessages = Utils.getContainer().state.listMessages;
     const newListMessages = listMessages.slice();
-    newListMessages.push({ userId, message });
+    newListMessages.push({
+      userId,
+      message,
+      productId,
+      productImageUrl,
+      productUrl
+    });
     Utils.getContainer().setState({ listMessages: newListMessages });
   });
 };
 
-const emitSendMessage = (roomName, userId, message) => {
+const emitSendMessage = (
+  roomName,
+  userId,
+  message,
+  productId,
+  productImageUrl,
+  productUrl
+) => {
   socket.emit('send-message', {
     roomName,
     userId,
-    message
+    message,
+    productId,
+    productImageUrl,
+    productUrl
   });
 };
 
