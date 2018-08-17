@@ -38,7 +38,7 @@ export default class LiveStreamScreen extends Component {
     super(props);
     this.state = {
       liveStatus: LiveStatus.REGISTER,
-      countViewer: 1,
+      countViewer: 0,
       countHeart: 0,
       message: '',
       visibleListMessages: true,
@@ -92,6 +92,18 @@ export default class LiveStreamScreen extends Component {
     } else if (userType === 'REPLAY') {
       SocketUtils.emitReplay(Utils.getRoomName(), Utils.getUserId());
     }
+  };
+
+  alertStreamerNotReady = () => {
+    return Alert.alert('Alert', 'Streamer not ready to live stream yet', [
+      {
+        text: 'Close',
+        onPress: () => {
+          SocketUtils.emitLeaveServer(Utils.getRoomName(), Utils.getUserId());
+          this.props.navigation.goBack();
+        }
+      }
+    ]);
   };
 
   keyboardShow(e) {
@@ -578,9 +590,9 @@ export default class LiveStreamScreen extends Component {
                     )}
                   </View>
                   <View style={styles.messageItem}>
-                    {productId !== undefined &&
-                      productUrl !== undefined &&
-                      productImageUrl !== undefined && (
+                    {productId !== null &&
+                      productUrl !== null &&
+                      productImageUrl !== null && (
                         <TouchableWithoutFeedback
                           onPress={() => this.onPressProduct(item)}
                         >

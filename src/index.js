@@ -13,6 +13,7 @@ SocketUtils.handleOnSendHeart();
 SocketUtils.handleOnSendMessage();
 SocketUtils.handleOnLeaveClient();
 SocketUtils.handleOnChangedLiveStatus();
+SocketUtils.handleOnNotReady();
 
 const RootStack = createStackNavigator(
   {

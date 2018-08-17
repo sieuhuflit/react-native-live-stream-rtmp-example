@@ -164,10 +164,22 @@ const emitReplay = (roomName, userId) => {
           let end = moment(messages[i].createdAt);
           let duration = end.diff(start);
           const timeout = setTimeout(() => {
-            const { userId, message } = messages[i];
+            const {
+              userId,
+              message,
+              productId,
+              productImageUrl,
+              productUrl
+            } = messages[i];
             listMessages = Utils.getContainer().state.listMessages;
             const newListMessages = listMessages.slice();
-            newListMessages.push({ userId, message });
+            newListMessages.push({
+              userId,
+              message,
+              productId,
+              productImageUrl,
+              productUrl
+            });
             Utils.getContainer().setState({ listMessages: newListMessages });
           }, duration);
           Utils.getTimeOutMessages().push(timeout);
@@ -210,6 +222,15 @@ const handleOnChangedLiveStatus = () => {
   });
 };
 
+const handleOnNotReady = () => {
+  socket.on('not-ready', () => {
+    console.log('not-ready');
+    Utils.getContainer().alertStreamerNotReady();
+    // countViewer = Utils.getContainer().state.countViewer;
+    // Utils.getContainer().setState({ countViewer: countViewer + 1 });
+  });
+};
+
 const SocketUtils = {
   getSocket,
   connect,
@@ -227,6 +248,7 @@ const SocketUtils = {
   emitLeaveServer,
   handleOnLeaveClient,
   emitReplay,
-  handleOnChangedLiveStatus
+  handleOnChangedLiveStatus,
+  handleOnNotReady
 };
 export default SocketUtils;
