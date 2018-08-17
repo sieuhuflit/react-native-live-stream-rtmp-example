@@ -590,9 +590,9 @@ export default class LiveStreamScreen extends Component {
                     )}
                   </View>
                   <View style={styles.messageItem}>
-                    {productId !== null &&
-                      productUrl !== null &&
-                      productImageUrl !== null && (
+                    {!Utils.isNullOrUndefined(productId) &&
+                      !Utils.isNullOrUndefined(productUrl) &&
+                      !Utils.isNullOrUndefined(productImageUrl) && (
                         <TouchableWithoutFeedback
                           onPress={() => this.onPressProduct(item)}
                         >
