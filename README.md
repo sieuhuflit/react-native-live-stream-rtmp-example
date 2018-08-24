@@ -2,9 +2,9 @@
 
 React native live streaming using RTMP.
 
-|                                   Streamer                                   |                                   Viewer                                   |
-| :--------------------------------------------------------------------------: | :------------------------------------------------------------------------: |
-| ![streamer-demo](https://media.giphy.com/media/vNdzySHuedZlEt49kG/giphy.gif) | ![viewer-demo](https://media.giphy.com/media/2xDzufTCpkL6OzoJ0a/giphy.gif) |
+|                                                         Streamer                                                         |                                   Viewer                                   |
+| :----------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------: |
+| ![streamer-demo](https://raw.githubusercontent.com/sieuhuflit/react-native-live-stream-rtmp-example/master/streamer.gif) | ![viewer-demo](https://media.giphy.com/media/2xDzufTCpkL6OzoJ0a/giphy.gif) |
 
 ## Teachnology using
 
