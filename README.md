@@ -6,6 +6,7 @@ React native live streaming using RTMP.
 | :----------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------: |
 | ![streamer-demo](https://raw.githubusercontent.com/sieuhuflit/react-native-live-stream-rtmp-example/master/streamer.gif) | ![viewer-demo](https://raw.githubusercontent.com/sieuhuflit/react-native-live-stream-rtmp-example/master/viewer.gif) |
 
+<img src="https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif" width="40" height="40" />
 ## Teachnology using
 
 Using react-native-nodemediaclient. Connect with RTMP server
