@@ -4,7 +4,7 @@ React native live streaming using RTMP.
 
 |                                   Streamer                                   |                                   Viewer                                   |
 | :--------------------------------------------------------------------------: | :------------------------------------------------------------------------: |
-| ![streamer-demo](https://media.giphy.com/media/pOPBRUMN6oQo6D0Pm3/giphy.gif) | ![viewer-demo](https://media.giphy.com/media/2xDzufTCpkL6OzoJ0a/giphy.gif) |
+| ![streamer-demo](https://media.giphy.com/media/vNdzySHuedZlEt49kG/giphy.gif) | ![viewer-demo](https://media.giphy.com/media/2xDzufTCpkL6OzoJ0a/giphy.gif) |
 
 ## Teachnology using
 
