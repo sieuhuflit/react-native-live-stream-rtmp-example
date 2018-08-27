@@ -19,7 +19,7 @@ Using react-native-nodemediaclient. Connect with RTMP server
 
 ## Config
 
-- Config the SocketIO ip address and RTMP server path, custom your IP_ADDRESS, PORT, and PATH_LIVE_STREAM
+- Config the SocketIO ip address and RTMP server path, change to your IP_ADDRESS, PORT, and PATH_LIVE_STREAM
 
 ```js
 const socketIOIP = 'http://IP_ADDRESS:PORT';
