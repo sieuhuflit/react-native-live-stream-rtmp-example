@@ -1,10 +1,8 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
   View,
   Text,
   TouchableWithoutFeedback,
-  StyleSheet,
-  Dimensions,
   Keyboard,
   Image,
   TouchableOpacity,
@@ -14,12 +12,12 @@ import {
   Alert,
   ScrollView,
   LayoutAnimation,
-  WebView,
   Modal,
-  StatusBar
+  StatusBar,
 } from 'react-native';
+import {WebView} from 'react-native-webview';
 import KeyboardAccessory from 'react-native-sticky-keyboard-accessory';
-import { NodeCameraView, NodePlayerView } from 'react-native-nodemediaclient';
+import {NodeCameraView, NodePlayerView} from 'react-native-nodemediaclient';
 import SocketUtils from '../SocketUtils';
 import LiveStatus from '../liveStatus';
 import Utils from '../Utils';
@@ -27,11 +25,9 @@ import FloatingHearts from '../components/FloatingHearts';
 import Draggable from '../components/Draggable';
 import styles from './styles';
 
-const { width, height } = Dimensions.get('window');
-
 export default class LiveStreamScreen extends Component {
-  static navigationOptions = ({ navigation }) => ({
-    header: null
+  static navigationOptions = ({navigation}) => ({
+    header: null,
   });
 
   constructor(props) {
@@ -59,8 +55,7 @@ export default class LiveStreamScreen extends Component {
       productUrl: null,
       productImageUrl: null,
       modalVisible: false,
-      keyboardHeight: 0,
-      inputHeight: 40
+      inputHeight: 40,
     };
     this.Animation = new Animated.Value(0);
     this.scrollView = null;
@@ -75,16 +70,16 @@ export default class LiveStreamScreen extends Component {
       keyboardHideEvent = 'keyboardDidHide';
     }
     this.keyboardShowListener = Keyboard.addListener(keyboardShowEvent, e =>
-      this.keyboardShow(e)
+      this.keyboardShow(e),
     );
     this.keyboardHideListener = Keyboard.addListener(keyboardHideEvent, e =>
-      this.keyboardHide(e)
+      this.keyboardHide(e),
     );
 
     Utils.setContainer(this);
     const userType = Utils.getUserType();
     if (userType === 'STREAMER') {
-      this.setState({ liveStatus: LiveStatus.REGISTER });
+      this.setState({liveStatus: LiveStatus.REGISTER});
       SocketUtils.emitRegisterLiveStream(Utils.getUserId(), Utils.getUserId());
     } else if (userType === 'VIEWER') {
       SocketUtils.emitJoinServer(Utils.getRoomName(), Utils.getUserId());
@@ -101,22 +96,22 @@ export default class LiveStreamScreen extends Component {
         onPress: () => {
           SocketUtils.emitLeaveServer(Utils.getRoomName(), Utils.getUserId());
           this.props.navigation.goBack();
-        }
-      }
+        },
+      },
     ]);
   };
 
   keyboardShow(e) {
     LayoutAnimation.easeInEaseOut();
     this.setState({
-      keyboardHeight: e.endCoordinates.height
+      keyboardHeight: e.endCoordinates.height,
     });
   }
 
   keyboardHide(e) {
     LayoutAnimation.easeInEaseOut();
     this.setState({
-      keyboardHeight: 0
+      keyboardHeight: 0,
     });
   }
 
@@ -125,31 +120,31 @@ export default class LiveStreamScreen extends Component {
 
     Animated.timing(this.Animation, {
       toValue: 1,
-      duration: 15000
+      duration: 15000,
     }).start(() => {
       this.StartBackgroundColorAnimation();
     });
   };
 
   onBeginLiveStream = () => {
-    this.setState({ liveStatus: LiveStatus.ON_LIVE });
+    this.setState({liveStatus: LiveStatus.ON_LIVE});
     SocketUtils.emitBeginLiveStream(Utils.getRoomName(), Utils.getUserId());
     this.vbCamera.start();
   };
 
   onFinishLiveStream = () => {
-    this.setState({ liveStatus: LiveStatus.FINISH });
+    this.setState({liveStatus: LiveStatus.FINISH});
     SocketUtils.emitFinishLiveStream(Utils.getRoomName(), Utils.getUserId());
     this.vbCamera.stop();
   };
 
   onPressHeart = () => {
-    this.setState({ countHeart: this.state.countHeart + 1 });
+    this.setState({countHeart: this.state.countHeart + 1});
     SocketUtils.emitSendHeart(Utils.getRoomName());
   };
 
   onChangeMessageText = text => {
-    this.setState({ message: text });
+    this.setState({message: text});
   };
 
   onPressSend = () => {
@@ -158,10 +153,10 @@ export default class LiveStreamScreen extends Component {
       listMessages,
       productId,
       productImageUrl,
-      productUrl
+      productUrl,
     } = this.state;
     if (productId !== null && productUrl !== null && productImageUrl !== null) {
-      this.setState({ message: '' });
+      this.setState({message: ''});
       Keyboard.dismiss();
       const newListMessages = listMessages.slice();
       newListMessages.push({
@@ -169,14 +164,14 @@ export default class LiveStreamScreen extends Component {
         message,
         productId,
         productImageUrl,
-        productUrl
+        productUrl,
       });
       this.setState({
         listMessages: newListMessages,
         visibleListMessages: true,
         productId: null,
         productUrl: null,
-        productImageUrl: null
+        productImageUrl: null,
       });
       SocketUtils.emitSendMessage(
         Utils.getRoomName(),
@@ -184,21 +179,21 @@ export default class LiveStreamScreen extends Component {
         message,
         productId,
         productImageUrl,
-        productUrl
+        productUrl,
       );
     } else if (message !== '') {
-      this.setState({ message: '' });
+      this.setState({message: ''});
       Keyboard.dismiss();
       const newListMessages = listMessages.slice();
-      newListMessages.push({ userId: Utils.getUserId(), message });
+      newListMessages.push({userId: Utils.getUserId(), message});
       this.setState({
         listMessages: newListMessages,
-        visibleListMessages: true
+        visibleListMessages: true,
       });
       SocketUtils.emitSendMessage(
         Utils.getRoomName(),
         Utils.getUserId(),
-        message
+        message,
       );
     }
   };
@@ -208,7 +203,7 @@ export default class LiveStreamScreen extends Component {
       productId: null,
       productUrl: null,
       productImageUrl: null,
-      modalVisible: false
+      modalVisible: false,
     });
   };
 
@@ -224,8 +219,7 @@ export default class LiveStreamScreen extends Component {
     return (
       <TouchableOpacity
         style={styles.buttonCancel}
-        onPress={this.onPressCancelViewer}
-      >
+        onPress={this.onPressCancelViewer}>
         <Image
           source={require('../assets/ico_cancel.png')}
           style={styles.iconCancel}
@@ -247,8 +241,7 @@ export default class LiveStreamScreen extends Component {
     return (
       <TouchableOpacity
         style={styles.buttonCancel}
-        onPress={this.onPressCancelReplay}
-      >
+        onPress={this.onPressCancelReplay}>
         <Image
           source={require('../assets/ico_cancel.png')}
           style={styles.iconCancel}
@@ -261,7 +254,7 @@ export default class LiveStreamScreen extends Component {
     if (this.vbCamera !== null && this.vbCamera !== undefined) {
       this.vbCamera.stop();
     }
-    const { liveStatus } = this.state;
+    const {liveStatus} = this.state;
     if (
       liveStatus === LiveStatus.REGISTER ||
       liveStatus === LiveStatus.ON_LIVE
@@ -273,23 +266,23 @@ export default class LiveStreamScreen extends Component {
           {
             text: 'Cancel',
             onPress: () => console.log('Cancel Pressed'),
-            style: 'cancel'
+            style: 'cancel',
           },
           {
             text: 'Sure',
             onPress: () => {
               SocketUtils.emitCancelLiveStream(
                 Utils.getRoomName(),
-                Utils.getUserId()
+                Utils.getUserId(),
               );
               SocketUtils.emitLeaveServer(
                 Utils.getRoomName(),
-                Utils.getUserId()
+                Utils.getUserId(),
               );
               this.props.navigation.goBack();
-            }
-          }
-        ]
+            },
+          },
+        ],
       );
     }
     this.props.navigation.goBack();
@@ -299,8 +292,7 @@ export default class LiveStreamScreen extends Component {
     return (
       <TouchableOpacity
         style={styles.buttonCancel}
-        onPress={this.onPressCancelStreamer}
-      >
+        onPress={this.onPressCancelStreamer}>
         <Image
           source={require('../assets/ico_cancel.png')}
           style={styles.iconCancel}
@@ -310,38 +302,36 @@ export default class LiveStreamScreen extends Component {
   };
 
   renderLiveText = () => {
-    const { liveStatus } = this.state;
+    const {liveStatus} = this.state;
     return (
       <View
         style={
           liveStatus === LiveStatus.ON_LIVE
             ? styles.wrapLiveText
             : styles.wrapNotLiveText
-        }
-      >
+        }>
         <Text
           style={
             liveStatus === LiveStatus.ON_LIVE
               ? styles.liveText
               : styles.notLiveText
-          }
-        >
+          }>
           LIVE
         </Text>
       </View>
     );
   };
 
-  setDropZoneValues = ({ nativeEvent }) => {
+  setDropZoneValues = ({nativeEvent}) => {
     const layout = {
       y: nativeEvent.layout.y,
       width: nativeEvent.layout.width,
       x: nativeEvent.layout.x,
       height: nativeEvent.layout.height,
-      keyboardHeight: this.state.keyboardHeight
+      keyboardHeight: this.state.keyboardHeight,
     };
     this.setState({
-      dropZoneCoordinates: layout
+      dropZoneCoordinates: layout,
     });
   };
 
@@ -350,7 +340,7 @@ export default class LiveStreamScreen extends Component {
       modalVisible: true,
       productId: item.id,
       productImageUrl: item.productImageUrl,
-      productUrl: item.productUrl
+      productUrl: item.productUrl,
     });
   };
 
@@ -361,7 +351,7 @@ export default class LiveStreamScreen extends Component {
       productImageUrl:
         'https://cf.shopee.vn/file/3c18ee889c242196030a86b7ce86a59e_tn',
       productUrl:
-        'https://shopee.vn/Áo-sơ-mi-lụa-dài-tay-kẻ-sọc-nam-nữ-cổ-Vest-unisex-mịn-mát-giá-rẻ-áo-style-Hàn-Quốc-MỚI-(7-màu)-i.12260860.1025065219'
+        'https://shopee.vn/Áo-sơ-mi-lụa-dài-tay-kẻ-sọc-nam-nữ-cổ-Vest-unisex-mịn-mát-giá-rẻ-áo-style-Hàn-Quốc-MỚI-(7-màu)-i.12260860.1025065219',
     });
   };
 
@@ -371,7 +361,8 @@ export default class LiveStreamScreen extends Component {
       productId: 2,
       productImageUrl:
         'https://cf.shopee.vn/file/1366956e12b7c40936a1e11ffe1bd486_tn',
-      productUrl: 'https://shopee.vn/Giày-thể-thao-nữ-G425-i.35709944.626245005'
+      productUrl:
+        'https://shopee.vn/Giày-thể-thao-nữ-G425-i.35709944.626245005',
     });
   };
 
@@ -382,12 +373,12 @@ export default class LiveStreamScreen extends Component {
       productImageUrl:
         'https://cf.shopee.vn/file/31df73f75132ec3f979c39c550e249b5',
       productUrl:
-        'https://shopee.vn/⚡Free-ship-Giầy-PROPHERE-Nam-Nữ-đế-mầu-cực-chất-(sẵn-hình-thật-hộp)-083-i.7466021.1123770706'
+        'https://shopee.vn/⚡Free-ship-Giầy-PROPHERE-Nam-Nữ-đế-mầu-cực-chất-(sẵn-hình-thật-hộp)-083-i.7466021.1123770706',
     });
   };
 
   renderGroupInput = () => {
-    const { message, dropZoneCoordinates, keyboardHeight } = this.state;
+    const {message, dropZoneCoordinates, keyboardHeight} = this.state;
     if (Platform.OS === 'android') {
       return (
         <View
@@ -395,12 +386,80 @@ export default class LiveStreamScreen extends Component {
           style={{
             flex: 1,
             height: this.state.keyboardHeight,
-            zIndex: -1
-          }}
-        >
+            zIndex: -1,
+          }}>
           <View style={styles.wrapBottom}>
-            {keyboardHeight > 0 &&
-              Utils.getUserType() === 'STREAMER' && (
+            {keyboardHeight > 0 && Utils.getUserType() === 'STREAMER' && (
+              <View style={styles.row}>
+                <Draggable
+                  imageUrl={
+                    'https://cf.shopee.vn/file/3c18ee889c242196030a86b7ce86a59e_tn'
+                  }
+                  dropZoneCoordinates={dropZoneCoordinates}
+                  onFinishDragProduct={this.onFinishDragProduct1}
+                />
+                <Draggable
+                  imageUrl={
+                    'https://cf.shopee.vn/file/1366956e12b7c40936a1e11ffe1bd486_tn'
+                  }
+                  dropZoneCoordinates={dropZoneCoordinates}
+                  onFinishDragProduct={this.onFinishDragProduct2}
+                />
+                <Draggable
+                  imageUrl={
+                    'https://cf.shopee.vn/file/31df73f75132ec3f979c39c550e249b5'
+                  }
+                  dropZoneCoordinates={dropZoneCoordinates}
+                  onFinishDragProduct={this.onFinishDragProduct3}
+                />
+              </View>
+            )}
+            <View style={styles.wrapInputAndActionButton}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Comment input"
+                underlineColorAndroid="transparent"
+                onChangeText={this.onChangeMessageText}
+                value={message}
+                onEndEditing={this.onPressSend}
+                autoCapitalize={'none'}
+                autoCorrect={false}
+                onFocus={() => {
+                  this.setState({visibleListMessages: false});
+                }}
+                onEndEditing={() => {
+                  Keyboard.dismiss();
+                  this.setState({visibleListMessages: true});
+                }}
+              />
+              <TouchableOpacity
+                style={styles.wrapIconSend}
+                onPress={this.onPressSend}
+                activeOpacity={0.6}>
+                <Image
+                  source={require('../assets/ico_send.png')}
+                  style={styles.iconSend}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.wrapIconHeart}
+                onPress={this.onPressHeart}
+                activeOpacity={0.6}>
+                <Image
+                  source={require('../assets/ico_heart.png')}
+                  style={styles.iconHeart}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      );
+    } else {
+      return (
+        <KeyboardAccessory backgroundColor="transparent">
+          <View style={styles.wrapBottomIOS}>
+            <View style={styles.col}>
+              {keyboardHeight > 0 && Utils.getUserType() === 'STREAMER' && (
                 <View style={styles.row}>
                   <Draggable
                     imageUrl={
@@ -425,79 +484,6 @@ export default class LiveStreamScreen extends Component {
                   />
                 </View>
               )}
-            <View style={styles.wrapInputAndActionButton}>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Comment input"
-                underlineColorAndroid="transparent"
-                onChangeText={this.onChangeMessageText}
-                value={message}
-                onEndEditing={this.onPressSend}
-                autoCapitalize={'none'}
-                autoCorrect={false}
-                onFocus={() => {
-                  this.setState({ visibleListMessages: false });
-                }}
-                onEndEditing={() => {
-                  Keyboard.dismiss();
-                  this.setState({ visibleListMessages: true });
-                }}
-              />
-              <TouchableOpacity
-                style={styles.wrapIconSend}
-                onPress={this.onPressSend}
-                activeOpacity={0.6}
-              >
-                <Image
-                  source={require('../assets/ico_send.png')}
-                  style={styles.iconSend}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.wrapIconHeart}
-                onPress={this.onPressHeart}
-                activeOpacity={0.6}
-              >
-                <Image
-                  source={require('../assets/ico_heart.png')}
-                  style={styles.iconHeart}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      );
-    } else {
-      return (
-        <KeyboardAccessory backgroundColor="transparent">
-          <View style={styles.wrapBottomIOS}>
-            <View style={styles.col}>
-              {keyboardHeight > 0 &&
-                Utils.getUserType() === 'STREAMER' && (
-                  <View style={styles.row}>
-                    <Draggable
-                      imageUrl={
-                        'https://cf.shopee.vn/file/3c18ee889c242196030a86b7ce86a59e_tn'
-                      }
-                      dropZoneCoordinates={dropZoneCoordinates}
-                      onFinishDragProduct={this.onFinishDragProduct1}
-                    />
-                    <Draggable
-                      imageUrl={
-                        'https://cf.shopee.vn/file/1366956e12b7c40936a1e11ffe1bd486_tn'
-                      }
-                      dropZoneCoordinates={dropZoneCoordinates}
-                      onFinishDragProduct={this.onFinishDragProduct2}
-                    />
-                    <Draggable
-                      imageUrl={
-                        'https://cf.shopee.vn/file/31df73f75132ec3f979c39c550e249b5'
-                      }
-                      dropZoneCoordinates={dropZoneCoordinates}
-                      onFinishDragProduct={this.onFinishDragProduct3}
-                    />
-                  </View>
-                )}
               <View
                 style={{
                   flex: 1,
@@ -506,10 +492,9 @@ export default class LiveStreamScreen extends Component {
                   marginHorizontal: 10,
                   marginBottom: 10,
                   borderRadius: 10,
-                  alignItems: 'center'
+                  alignItems: 'center',
                 }}
-                onLayout={this.setDropZoneValues}
-              >
+                onLayout={this.setDropZoneValues}>
                 <TextInput
                   style={styles.textInput}
                   placeholder="Comment input"
@@ -520,18 +505,17 @@ export default class LiveStreamScreen extends Component {
                   autoCapitalize={'none'}
                   autoCorrect={false}
                   onFocus={() => {
-                    this.setState({ visibleListMessages: false });
+                    this.setState({visibleListMessages: false});
                   }}
                   onEndEditing={() => {
                     Keyboard.dismiss();
-                    this.setState({ visibleListMessages: true });
+                    this.setState({visibleListMessages: true});
                   }}
                 />
                 <TouchableOpacity
                   style={styles.wrapIconSend}
                   onPress={this.onPressSend}
-                  activeOpacity={0.6}
-                >
+                  activeOpacity={0.6}>
                   <Image
                     source={require('../assets/ico_send.png')}
                     style={styles.iconSend}
@@ -540,8 +524,7 @@ export default class LiveStreamScreen extends Component {
                 <TouchableOpacity
                   style={styles.wrapIconHeart}
                   onPress={this.onPressHeart}
-                  activeOpacity={0.6}
-                >
+                  activeOpacity={0.6}>
                   <Image
                     source={require('../assets/ico_heart.png')}
                     style={styles.iconHeart}
@@ -556,7 +539,7 @@ export default class LiveStreamScreen extends Component {
   };
 
   renderListMessages = () => {
-    const { listMessages, visibleListMessages } = this.state;
+    const {listMessages, visibleListMessages} = this.state;
     if (!visibleListMessages) {
       return null;
     }
@@ -565,9 +548,8 @@ export default class LiveStreamScreen extends Component {
         <ScrollView
           ref={ref => (this.scrollView = ref)}
           onContentSizeChange={(contentWidth, contentHeight) => {
-            this.scrollView.scrollToEnd({ animated: true });
-          }}
-        >
+            this.scrollView.scrollToEnd({animated: true});
+          }}>
           {listMessages.length > 0 &&
             listMessages.map((item, index) => {
               const {
@@ -575,7 +557,7 @@ export default class LiveStreamScreen extends Component {
                 productUrl,
                 productImageUrl,
                 userId,
-                message
+                message,
               } = item;
               return (
                 <View style={styles.chatItem} key={index}>
@@ -594,11 +576,10 @@ export default class LiveStreamScreen extends Component {
                       !Utils.isNullOrUndefined(productUrl) &&
                       !Utils.isNullOrUndefined(productImageUrl) && (
                         <TouchableWithoutFeedback
-                          onPress={() => this.onPressProduct(item)}
-                        >
+                          onPress={() => this.onPressProduct(item)}>
                           <View style={styles.wrapSeeDetail}>
                             <Image
-                              source={{ uri: productImageUrl }}
+                              source={{uri: productImageUrl}}
                               style={styles.iconProduct}
                             />
                             <Text style={styles.textShowDetail}>
@@ -619,7 +600,7 @@ export default class LiveStreamScreen extends Component {
     );
   };
   renderStreamerUI = () => {
-    const { liveStatus, countViewer, countHeart } = this.state;
+    const {liveStatus, countViewer, countHeart} = this.state;
     return (
       <View style={styles.container}>
         <StatusBar barStyle="light-content" backgroundColor="#6a51ae" />
@@ -629,14 +610,14 @@ export default class LiveStreamScreen extends Component {
             this.vbCamera = vb;
           }}
           outputUrl={Utils.getRtmpPath() + Utils.getRoomName()}
-          camera={{ cameraId: 1, cameraFrontMirror: true }}
-          audio={{ bitrate: 32000, profile: 1, samplerate: 44100 }}
+          camera={{cameraId: 1, cameraFrontMirror: true}}
+          audio={{bitrate: 32000, profile: 1, samplerate: 44100}}
           video={{
             preset: 1,
             bitrate: 500000,
             profile: 1,
             fps: 15,
-            videoFrontMirror: false
+            videoFrontMirror: false,
           }}
           smoothSkinLevel={3}
           autopreview={true}
@@ -644,11 +625,10 @@ export default class LiveStreamScreen extends Component {
         <TouchableWithoutFeedback
           onPress={() => {
             Keyboard.dismiss();
-            this.setState({ visibleListMessages: true });
+            this.setState({visibleListMessages: true});
           }}
           accessible={false}
-          style={styles.viewDismissKeyboard}
-        >
+          style={styles.viewDismissKeyboard}>
           <View style={styles.container}>
             {this.renderCancelStreamerButton()}
             {this.renderLiveText()}
@@ -666,16 +646,14 @@ export default class LiveStreamScreen extends Component {
             {liveStatus === LiveStatus.REGISTER && (
               <TouchableOpacity
                 style={styles.beginLiveStreamButton}
-                onPress={this.onBeginLiveStream}
-              >
+                onPress={this.onBeginLiveStream}>
                 <Text style={styles.beginLiveStreamText}>Begin Live</Text>
               </TouchableOpacity>
             )}
             {liveStatus === LiveStatus.ON_LIVE && (
               <TouchableOpacity
                 style={styles.finishLiveStreamButton}
-                onPress={this.onFinishLiveStream}
-              >
+                onPress={this.onFinishLiveStream}>
                 <Text style={styles.beginLiveStreamText}>Finish</Text>
               </TouchableOpacity>
             )}
@@ -688,26 +666,23 @@ export default class LiveStreamScreen extends Component {
           visible={this.state.modalVisible}
           onRequestClose={() => {
             alert('Modal has been closed.');
-          }}
-        >
+          }}>
           <View
             style={{
               flex: 1,
               backgroundColor: 'rgba(0,0,0,0.6)',
-              justifyContent: 'center'
-            }}
-          >
+              justifyContent: 'center',
+            }}>
             <TouchableOpacity
               style={styles.buttonCloseModal}
-              onPress={this.onPressCloseModal}
-            >
+              onPress={this.onPressCloseModal}>
               <Image
                 source={require('../assets/ico_cancel.png')}
                 style={styles.iconCancel}
               />
             </TouchableOpacity>
             <View style={styles.wrapWebview}>
-              <WebView source={{ uri: this.state.productUrl }} />
+              <WebView source={{uri: this.state.productUrl}} />
             </View>
           </View>
         </Modal>
@@ -724,10 +699,10 @@ export default class LiveStreamScreen extends Component {
         '#9b59b6',
         '#34495e',
         '#f1c40f',
-        '#1abc9c'
-      ]
+        '#1abc9c',
+      ],
     });
-    const { liveStatus, countViewer, countHeart } = this.state;
+    const {liveStatus, countViewer, countHeart} = this.state;
     return (
       <View style={styles.container}>
         <StatusBar barStyle="light-content" backgroundColor="#6a51ae" />
@@ -748,11 +723,10 @@ export default class LiveStreamScreen extends Component {
         <TouchableWithoutFeedback
           onPress={() => {
             Keyboard.dismiss();
-            this.setState({ visibleListMessages: true });
+            this.setState({visibleListMessages: true});
           }}
           accessible={false}
-          style={styles.viewDismissKeyboard}
-        >
+          style={styles.viewDismissKeyboard}>
           {liveStatus === LiveStatus.ON_LIVE ? (
             <View style={styles.container}>
               {this.renderCancelViewerButton()}
@@ -776,9 +750,9 @@ export default class LiveStreamScreen extends Component {
             <Animated.View
               style={[
                 styles.container,
-                { backgroundColor: BackgroundColorConfig }
-              ]}
-            >
+                {backgroundColor: BackgroundColorConfig},
+                ,
+              ]}>
               {liveStatus === LiveStatus.REGISTER && (
                 <View style={styles.wrapPromotionText}>
                   <Text style={styles.textPromotion}>
@@ -813,26 +787,23 @@ export default class LiveStreamScreen extends Component {
           visible={this.state.modalVisible}
           onRequestClose={() => {
             alert('Modal has been closed.');
-          }}
-        >
+          }}>
           <View
             style={{
               flex: 1,
               backgroundColor: 'rgba(0,0,0,0.6)',
-              justifyContent: 'center'
-            }}
-          >
+              justifyContent: 'center',
+            }}>
             <TouchableOpacity
               style={styles.buttonCloseModal}
-              onPress={this.onPressCloseModal}
-            >
+              onPress={this.onPressCloseModal}>
               <Image
                 source={require('../assets/ico_cancel.png')}
                 style={styles.iconCancel}
               />
             </TouchableOpacity>
             <View style={styles.wrapWebview}>
-              <WebView source={{ uri: this.state.productUrl }} />
+              <WebView source={{uri: this.state.productUrl}} />
             </View>
           </View>
         </Modal>
@@ -841,16 +812,15 @@ export default class LiveStreamScreen extends Component {
   };
 
   renderReplayUI = () => {
-    const { countViewer } = this.state;
+    const {countViewer} = this.state;
     return (
       <View style={styles.container}>
         <TouchableWithoutFeedback
           onPress={() => {
             Keyboard.dismiss();
-            this.setState({ visibleListMessages: true });
+            this.setState({visibleListMessages: true});
           }}
-          accessible={false}
-        >
+          accessible={false}>
           <View style={styles.container}>
             <NodePlayerView
               style={styles.streamerCameraView}

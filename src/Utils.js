@@ -1,13 +1,17 @@
-const userType = null;
-const container = null;
-const userId = null;
-const roomName = null;
+let userType = null;
+let container = null;
+let userId = null;
+let roomName = null;
 let timeOutMessages = [];
 
-const socketIOIP = 'http://103.221.221.111:3333';
-// const socketIOIP = 'http://192.168.1.2:3333';
-const rtmpPath = 'rtmp://103.221.221.111/live/';
-// const rtmpPath = 'rtmp://192.168.1.2/live/';
+/**
+ * CHANGE THIS ---------------------------------
+ */
+const socketIOIP = 'http://127.0.0.1:3333';
+const rtmpPath = 'rtmp://127.0.0.1/live/';
+/**
+ *----------------------------------------------
+ */
 
 const getSocketIOIP = () => {
   return socketIOIP;
@@ -76,7 +80,7 @@ const Utils = {
   getTimeOutMessages,
   clearTimeOutMessages,
   getSocketIOIP,
-  getRtmpPath
+  getRtmpPath,
 };
 
 export default Utils;
