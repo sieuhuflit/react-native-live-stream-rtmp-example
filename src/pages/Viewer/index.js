@@ -1,15 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  View,
-  Image,
-  TouchableOpacity,
-  Text,
-  SafeAreaView,
-  Animated,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Image, TouchableOpacity, Text, SafeAreaView, Animated, Alert } from 'react-native';
 import get from 'lodash/get';
 import { NodePlayerView } from 'react-native-nodemediaclient';
 import moment from 'moment';
@@ -27,7 +18,6 @@ export default class Viewer extends Component {
     const { route } = props;
     const data = get(route, 'params.data');
     const roomName = get(data, 'roomName');
-    const messages = get(data, 'messages');
     const liveStatus = get(data, 'liveStatus', LIVE_STATUS.PREPARE);
     const userName = get(route, 'params.userName', '');
     this.state = {
@@ -53,20 +43,16 @@ export default class Viewer extends Component {
         roomName: this.roomName,
       });
       SocketManager.instance.listenReplay((data) => {
-        const { createdAt, messages } = data;
-        const start = moment(createdAt);
+        const { beginAt, messages } = data;
+        const start = moment(beginAt);
         for (let i = 0; i < messages.length; i += 1) {
-          // (function (i) {
-          //   const end = moment(messages[i].createdAt);
-          //   const duration = end.diff(start);
-          //   console.log('....... closeure work');
-          //   console.log(duration);
-          // setTimeout(function () {
-          //   console.log('.........');
-          //   console.log('inside timeout work');
-          this.setState((prevState) => ({ messages: [...prevState.messages, messages[i]] }));
-          // }, duration);
-          // })(i);
+          ((j, that) => {
+            const end = moment(messages[j].createdAt);
+            const duration = end.diff(start);
+            setTimeout(() => {
+              that.setState((prevState) => ({ messages: [...prevState.messages, messages[j]] }));
+            }, duration);
+          })(i, this);
         }
       });
       const inputUrl = `rtmp://192.168.5.143/live/${this.roomName}/replayFor${this.userName}`;
@@ -109,6 +95,12 @@ export default class Viewer extends Component {
     SocketManager.instance.emitLeaveRoom({
       userName: this.userName,
       roomName: this.roomName,
+    });
+    this.setState({
+      messages: [],
+      countHeart: 0,
+      isVisibleMessages: true,
+      inputUrl: null,
     });
     clearTimeout(this.timeout);
   }
@@ -198,19 +190,36 @@ export default class Viewer extends Component {
 
   renderListMessages = () => {
     const { messages, isVisibleMessages } = this.state;
-    console.log('..........shit ');
-    console.log(messages);
     if (!isVisibleMessages) return null;
     return <MessagesList messages={messages} />;
   };
 
   render() {
     const { countHeart } = this.state;
-
+    /**
+     * Replay mode
+     */
+    if (this.liveStatus === LIVE_STATUS.FINISH) {
+      return (
+        <View style={styles.blackContainer}>
+          {this.renderNodePlayerView()}
+          {this.renderListMessages()}
+          <TouchableOpacity style={styles.btnClose} onPress={this.onPressClose}>
+            <Image
+              style={styles.icoClose}
+              source={require('../../assets/close.png')}
+              tintColor="white"
+            />
+          </TouchableOpacity>
+          <FloatingHearts count={countHeart} />
+        </View>
+      );
+    }
+    /**
+     * Viewer mode
+     */
     return (
-      <View
-        style={this.liveStatus === LIVE_STATUS.FINISH ? styles.blackContainer : styles.container}
-      >
+      <View style={styles.container}>
         {this.renderBackgroundColors()}
         {this.renderNodePlayerView()}
         {this.renderChatGroup()}

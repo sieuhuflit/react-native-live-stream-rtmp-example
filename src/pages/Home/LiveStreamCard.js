@@ -11,14 +11,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 20,
     paddingHorizontal: 25,
     borderRadius: 8,
     marginBottom: 15,
   },
   roomName: {
     fontWeight: '600',
-    fontSize: 20,
+    fontSize: 22,
   },
   liveStatus: {
     fontSize: 20,
@@ -26,8 +26,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   statusIcon: {
-    width: 64,
-    height: 64,
+    width: 50,
+    height: 50,
   },
   onLiveIcon: {
     width: 100,
