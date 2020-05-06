@@ -2,7 +2,7 @@
 
 React native live streaming using RTMP.
 
-Server : https://github.com/sieuhuflit/live-stream-rtmp-server
+Server : https://github.com/sieuhuflit/live-tream-rtmp-server
 
 ## Demo
 
