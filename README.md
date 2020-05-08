@@ -62,6 +62,13 @@ yarn run ios
 yarn run run-android
 ```
 
+## Common problem
+
+`1/ Can't replay video.`
+
+Make sure you are following live stream server step.
+Install ffmpeg and do extra step to Replay live stream video
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
