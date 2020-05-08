@@ -1,5 +1,6 @@
 import io from 'socket.io-client';
 import Logger from './utils/logger';
+import { SOCKET_IO_SERVER } from './config';
 
 const EVENT_JOIN_ROOM = 'join-room';
 const EVENT_LEAVE_ROOM = 'leave-room';
@@ -19,7 +20,7 @@ class SocketManager {
       return SocketManager.instance;
     }
     SocketManager.instance = this;
-    this.socket = io.connect('http://192.168.5.143:3333');
+    this.socket = io.connect(SOCKET_IO_SERVER);
     this.setupListenDefaultEvents();
     return this;
   }

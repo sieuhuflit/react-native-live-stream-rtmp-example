@@ -1,6 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { View, Image, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
+import {
+  View,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+  Alert,
+  PermissionsAndroid,
+} from 'react-native';
 import { NodeCameraView } from 'react-native-nodemediaclient';
 import get from 'lodash/get';
 import { LIVE_STATUS, videoConfig, audioConfig } from '../../utils/constants';
@@ -10,6 +17,8 @@ import LiveStreamActionButton from './LiveStreamActionButton';
 import ChatInputGroup from '../../components/ChatInputGroup';
 import MessagesList from '../../components/MessagesList/MessagesList';
 import FloatingHearts from '../../components/FloatingHearts';
+import { RTMP_SERVER } from '../../config';
+import Logger from '../../utils/logger';
 
 export default class Streamer extends React.Component {
   constructor(props) {
@@ -28,6 +37,7 @@ export default class Streamer extends React.Component {
   }
 
   componentDidMount() {
+    this.requestCameraPermission();
     SocketManager.instance.emitPrepareLiveStream({
       userName: this.userName,
       roomName: this.roomName,
@@ -121,6 +131,32 @@ export default class Streamer extends React.Component {
     }
   };
 
+  requestCameraPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.requestMultiple(
+        [PermissionsAndroid.PERMISSIONS.CAMERA, PermissionsAndroid.PERMISSIONS.RECORD_AUDIO],
+        {
+          title: 'LiveStreamExample need Camera And Microphone Permission',
+          message:
+            'LiveStreamExample needs access to your camera so you can take awesome pictures.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        }
+      );
+      if (
+        granted['android.permission.CAMERA'] === PermissionsAndroid.RESULTS.GRANTED &&
+        granted['android.permission.RECORD_AUDIO'] === PermissionsAndroid.RESULTS.GRANTED
+      ) {
+        if (this.nodeCameraViewRef) this.nodeCameraViewRef.startPreview();
+      } else {
+        Logger.log('Camera permission denied');
+      }
+    } catch (err) {
+      Logger.warn(err);
+    }
+  };
+
   renderChatGroup = () => {
     return (
       <ChatInputGroup
@@ -146,7 +182,7 @@ export default class Streamer extends React.Component {
     const { route } = this.props;
     const { currentLiveStatus, countHeart } = this.state;
     const userName = get(route, 'params.userName', '');
-    const outputUrl = `rtmp://192.168.5.143/live/${userName}`;
+    const outputUrl = `${RTMP_SERVER}/live/${userName}`;
     return (
       <SafeAreaView style={styles.container}>
         <NodeCameraView
@@ -157,7 +193,7 @@ export default class Streamer extends React.Component {
           audio={audioConfig}
           video={videoConfig}
           smoothSkinLevel={3}
-          autopreview
+          autopreview={false}
         />
         <SafeAreaView style={styles.contentWrapper}>
           <View style={styles.header}>

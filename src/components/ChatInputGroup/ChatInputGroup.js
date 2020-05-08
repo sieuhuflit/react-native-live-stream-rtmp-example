@@ -1,6 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { View, SafeAreaView, TextInput, TouchableOpacity, Image, Keyboard } from 'react-native';
+import {
+  View,
+  SafeAreaView,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Keyboard,
+  Platform,
+} from 'react-native';
 import KeyboardAccessory from 'react-native-sticky-keyboard-accessory';
 import styles from './styles';
 
@@ -38,39 +46,48 @@ export default class ChatInputGroup extends Component {
 
   onChangeMessageText = (text) => [this.setState({ message: text })];
 
-  render() {
+  renderContent() {
     const { message } = this.state;
+    return (
+      <View style={styles.row}>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Comment input"
+          underlineColorAndroid="transparent"
+          onChangeText={this.onChangeMessageText}
+          value={message}
+          autoCapitalize="none"
+          autoCorrect={false}
+          onEndEditing={this.onEndEditing}
+          onFocus={this.onFocus}
+        />
+        <TouchableOpacity
+          style={styles.wrapIconSend}
+          onPress={this.onPressSend}
+          activeOpacity={0.6}
+        >
+          <Image source={require('../../assets/ico_send.png')} style={styles.iconSend} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.wrapIconHeart}
+          onPress={this.onPressHeart}
+          activeOpacity={0.6}
+        >
+          <Image source={require('../../assets/ico_heart.png')} style={styles.iconHeart} />
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  render() {
+    if (Platform.OS === 'android') {
+      return <SafeAreaView style={styles.wrapper}>{this.renderContent()}</SafeAreaView>;
+    }
     return (
       <SafeAreaView style={styles.wrapper}>
         <View style={styles.flex1}>
           <KeyboardAccessory backgroundColor="transparent">
-            <View style={styles.row}>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Comment input"
-                underlineColorAndroid="transparent"
-                onChangeText={this.onChangeMessageText}
-                value={message}
-                autoCapitalize="none"
-                autoCorrect={false}
-                onEndEditing={this.onEndEditing}
-                onFocus={this.onFocus}
-              />
-              <TouchableOpacity
-                style={styles.wrapIconSend}
-                onPress={this.onPressSend}
-                activeOpacity={0.6}
-              >
-                <Image source={require('../../assets/ico_send.png')} style={styles.iconSend} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.wrapIconHeart}
-                onPress={this.onPressHeart}
-                activeOpacity={0.6}
-              >
-                <Image source={require('../../assets/ico_heart.png')} style={styles.iconHeart} />
-              </TouchableOpacity>
-            </View>
+            {this.renderContent()}
           </KeyboardAccessory>
         </View>
       </SafeAreaView>
