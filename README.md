@@ -61,3 +61,7 @@ yarn run ios
 ```bash
 yarn run run-android
 ```
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
