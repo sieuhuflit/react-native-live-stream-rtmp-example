@@ -16,6 +16,17 @@ An example live stream rtmp application using React native
 | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | <img src="https://raw.githubusercontent.com/sieuhuflit/react-native-live-stream-rtmp-example/master/streamer.gif" /> | <img src="https://raw.githubusercontent.com/sieuhuflit/react-native-live-stream-rtmp-example/master/viewer.gif" /> |
 
+## Feature
+
+- ✅ Live Stream with input username account
+- ✅ The video can replay
+- ✅ Live update status when `Pending`, `On Live`, and `Finish` live streaming process
+- ✅ Streamer and viewer can chat and send heart when livestream
+
+## Teachnology using
+
+- Using node-media-server
+
 ## Getting Started
 
 We need the RTMP server first. Download the repository below and follow the README information.
