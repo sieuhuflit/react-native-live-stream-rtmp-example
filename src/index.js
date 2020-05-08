@@ -1,33 +1,32 @@
-import {createAppContainer} from 'react-navigation';
-import {createStackNavigator} from 'react-navigation-stack';
-import SocketUtils from './SocketUtils';
-import HomeScreen from './screens/HomeScreen';
-import ListScreen from './screens/ListScreen';
-import LiveStreamScreen from './screens/LiveStreamScreen';
+import React, { Component } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import Login from './pages/Login';
+import Home from './pages/Home';
+import Streamer from './pages/Streamer';
+import Viewer from './pages/Viewer';
 
-SocketUtils.connect();
-SocketUtils.handleOnConnect();
-SocketUtils.handleOnClientJoin();
-SocketUtils.handleOnSendHeart();
-SocketUtils.handleOnSendMessage();
-SocketUtils.handleOnLeaveClient();
-SocketUtils.handleOnChangedLiveStatus();
-SocketUtils.handleOnNotReady();
+const Stack = createStackNavigator();
 
-const RootStack = createStackNavigator(
-  {
-    Home: HomeScreen,
-    List: ListScreen,
-    Live: LiveStreamScreen,
-  },
-  {
-    initialRouteName: 'Home',
-    navigationOptions: {
-      gesturesEnabled: false,
-    },
-  },
-);
+class App extends Component {
+  componentDidMount() {}
 
-const App = createAppContainer(RootStack);
+  render() {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="Streamer" component={Streamer} />
+          <Stack.Screen name="Viewer" component={Viewer} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
+}
 
 export default App;
