@@ -15,7 +15,7 @@
     "@react-navigation/stack": "^5.2.13",
     "babel-eslint": "^10.1.0",
     "lodash": "^4.17.15",
-    "moment": "^2.25.1",
+    "moment": "^2.29.2",
     "prettier": "^2.0.5",
     "prop-types": "^15.7.2",
     "react": "16.11.0",
