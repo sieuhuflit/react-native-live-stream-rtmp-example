@@ -2,30 +2,7 @@
 
 An example live stream rtmp application using React native
 
-## Demo v2
-
-**Note: Here is demo for version 2.0**
-
-<img src="demo/1.png" width="280" title="hover text">
-
-## Demo v1
-
-**Note: Here is demo for version 1.0**
-
-| Streamer                                                                                                                  | Viewer                                                                                                                  |
-| ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| <img src="https://raw.githubusercontent.com/sieuhuflit/react-native-live-stream-rtmp-example/master/demo/streamer.gif" /> | <img src="https://raw.githubusercontent.com/sieuhuflit/react-native-live-stream-rtmp-example/master/demo/viewer.gif" /> |
-
-## Feature
-
-- ✅ Live Stream with input username account
-- ✅ The video can replay
-- ✅ Live update status when `Pending`, `On Live`, and `Finish` live streaming process
-- ✅ Streamer and viewer can chat and send heart when livestream
-
-## Teachnology using
-
-- Using node-media-server
+<img src="https://raw.githubusercontent.com/sieuhuflit/react-native-live-stream-rtmp-example/master/demo/demo.gif" />
 
 ## Getting Started
 
@@ -35,39 +12,41 @@ Server : https://github.com/sieuhuflit/live-tream-rtmp-server
 
 ## Config
 
-Then we check the _src/config.js_ to edit the server information. Fill in your localhost server information (Ip address, Port)
+Before start, open config.ts file to edit RTMP server ip address
 
-```js
-export const SOCKET_IO_SERVER = 'http://192.168.5.143:3333'; // Edit this
-export const RTMP_SERVER = 'rtmp://192.168.5.143'; // Edit this
+```
+const Config = {
+  RTMP_URL: 'rtmp://{YOUR_RTMP_IP_ADDRESS_HERE}/live',
+};
+
+export default Config;
 ```
 
-## Install package
+## Install package & Running
 
 ```bash
 yarn install
+yarn ios
+yarn android
 ```
 
-## Running the App
+## Check live stream work
 
-### iOS
+After running rtmp server, we can run below command
 
-```bash
-yarn run ios
+Command below is serve the test.mp4 video to localhost with stream name `test`
+
+```
+ffmpeg -re -i ~/Desktop/test.mp4 -c copy -f flv rtmp://localhost/live/test
 ```
 
-### Android
+## FAQ
 
-```bash
-yarn run run-android
-```
+1. Start live stream iOS simulator not displayed
+   Start live stream not worked on iOS simulator, please test start live stream feature on real iOS device
 
-## Common problem
-
-`1/ Can't replay video.`
-
-Make sure you are following live stream server step.
-Install ffmpeg and do extra step to Replay live stream video
+2. Display blanked when join room on Android
+   Make sure you change IP address on step above
 
 ## License
 
