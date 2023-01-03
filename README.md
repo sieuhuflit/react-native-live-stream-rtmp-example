@@ -2,6 +2,8 @@
 
 An example live stream rtmp application using React native
 
+<img src="https://raw.githubusercontent.com/sieuhuflit/react-native-live-stream-rtmp-example/master/demo/demo.gif" />
+
 ## Getting Started
 
 We need the RTMP server first. Download the repository below and follow the README information.
@@ -20,24 +22,22 @@ const Config = {
 export default Config;
 ```
 
-## Install package
+## Install package & Running
 
 ```bash
 yarn install
+yarn ios
+yarn android
 ```
 
-## Running the App
+## Check live stream work
 
-### iOS
+After running rtmp server, we can run below command
 
-```bash
-yarn run ios
+Command below is serve the test.mp4 video to localhost with stream name `test`
+
 ```
-
-### Android
-
-```bash
-yarn run run-android
+ffmpeg -re -i ~/Desktop/test.mp4 -c copy -f flv rtmp://localhost/live/test
 ```
 
 ## FAQ
